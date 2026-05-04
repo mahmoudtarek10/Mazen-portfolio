@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Engineer Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#05070a;
+  --bg2:#090d12;
+  --bg3:#0e1419;
+  --surface:rgba(14,20,25,0.9);
+  --accent:#00e5b4;
+  --accent2:#0090ff;
+  --accent3:#ff5c87;
+  --text:#ddeaf5;
+  --text2:#7a9bb5;
+  --text3:#3d5a72;
+  --border:rgba(0,229,180,0.1);
+  --border2:rgba(0,229,180,0.2);
+  --glow:rgba(0,229,180,0.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Grid bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,180,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,180,0.018) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0
+}
+/* Glow orbs */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 600px 400px at 10% 20%,rgba(0,229,180,0.05) 0%,transparent 70%),
+    radial-gradient(ellipse 500px 600px at 90% 70%,rgba(0,144,255,0.04) 0%,transparent 70%),
+    radial-gradient(ellipse 400px 300px at 50% 90%,rgba(255,92,135,0.03) 0%,transparent 60%);
+  pointer-events:none;z-index:0
+}
+#app{position:relative;z-index:1}
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+
+/* ── SCAN LINE ── */
+@keyframes scan{0%{top:-2%}100%{top:102%}}
+.scan-line{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(0,229,180,0.4) 50%,transparent 100%);pointer-events:none;z-index:300;animation:scan 12s linear infinite;opacity:0.5}
+
+/* ── NAV ── */
+.pf-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:0 2rem;height:60px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(5,7,10,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border)
+}
+.pf-logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
+  letter-spacing:0.05em;color:var(--text);
+  display:flex;align-items:center;gap:6px
+}
+.pf-logo .acc{color:var(--accent)}
+.pf-logo .pipe{color:var(--text3);margin:0 2px}
+
+.pf-links{display:flex;gap:2rem;list-style:none;align-items:center}
+.pf-links a{
+  color:var(--text2);text-decoration:none;
+  font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;
+  transition:color 0.2s;text-transform:lowercase
+}
+.pf-links a:hover{color:var(--accent)}
+.admin-btn{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);padding:0.35rem 0.9rem;border-radius:3px;
+  cursor:pointer;font-family:'Space Mono',monospace;font-size:0.68rem;
+  letter-spacing:0.08em;transition:all 0.2s
+}
+.admin-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* hamburger */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:transparent;border:none}
+.hamburger span{display:block;width:22px;height:1.5px;background:var(--text2);border-radius:2px;transition:all 0.3s}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.mobile-nav{display:none;position:fixed;top:60px;left:0;right:0;background:rgba(5,7,10,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:99;padding:1.25rem 2rem;flex-direction:column;gap:0}
+.mobile-nav.open{display:flex}
+.mobile-nav a{color:var(--text2);text-decoration:none;font-family:'Space Mono',monospace;font-size:0.8rem;padding:0.7rem 0;border-bottom:1px solid var(--border);transition:color 0.2s;letter-spacing:0.05em}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:hover{color:var(--accent)}
+
+@media(max-width:768px){
+  .pf-links,.admin-btn{display:none}
+  .hamburger{display:flex}
+  .pf-nav{padding:0 1.25rem}
+}
+
+/* ── HERO ── */
+.pf-hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:7rem 2rem 4rem;
+  position:relative;overflow:hidden
+}
+@media(min-width:900px){.pf-hero{padding:6rem 4rem 4rem}}
+.hero-inner{max-width:900px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,229,180,0.06);border:1px solid rgba(0,229,180,0.2);
+  padding:0.35rem 0.85rem;border-radius:2px;
+  font-family:'Space Mono',monospace;font-size:0.65rem;
+  color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;
+  margin-bottom:1.5rem;animation:fadeUp 0.6s ease both
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+
+.hero-name{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(2.8rem,9vw,6.5rem);line-height:0.95;
+  letter-spacing:-0.02em;margin-bottom:1.25rem;
+  animation:fadeUp 0.6s 0.1s ease both
+}
+.hero-name .line1{color:var(--text);display:block}
+.hero-name .line2{
+  color:transparent;display:block;
+  -webkit-text-stroke:1.5px var(--accent);
+  text-stroke:1.5px var(--accent)
+}
+@media(max-width:500px){.hero-name .line2{-webkit-text-stroke-width:1px}}
+
+.hero-role{
+  font-family:'Space Mono',monospace;font-size:clamp(0.75rem,2vw,0.9rem);
+  color:var(--accent2);letter-spacing:0.1em;margin-bottom:1.5rem;
+  animation:fadeUp 0.6s 0.2s ease both
+}
+.hero-role::before{content:'→ ';color:var(--text3)}
+
+.hero-desc{
+  max-width:560px;color:var(--text2);line-height:1.8;
+  font-size:clamp(0.9rem,2vw,1rem);margin-bottom:2.5rem;
+  border-left:2px solid rgba(0,229,180,0.3);padding-left:1.25rem;
+  animation:fadeUp 0.6s 0.3s ease both
+}
+
+.hero-stats{
+  display:flex;gap:2.5rem;flex-wrap:wrap;margin-bottom:2.5rem;
+  animation:fadeUp 0.6s 0.4s ease both
+}
+.stat-item{}
+.stat-num{font-family:'Syne',sans-serif;font-weight:700;font-size:1.6rem;color:var(--accent);line-height:1}
+.stat-lbl{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px}
+
+.hero-btns{display:flex;gap:0.75rem;flex-wrap:wrap;animation:fadeUp 0.6s 0.5s ease both}
+.btn-primary{
+  background:var(--accent);color:#05070a;
+  border:none;padding:0.7rem 1.75rem;border-radius:3px;
+  cursor:pointer;font-family:'Space Mono',monospace;font-size:0.75rem;
+  letter-spacing:0.08em;font-weight:700;transition:all 0.2s
+}
+.btn-primary:hover{background:#00ffcb;transform:translateY(-1px)}
+.btn-outline{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);padding:0.7rem 1.75rem;border-radius:3px;
+  cursor:pointer;font-family:'Space Mono',monospace;font-size:0.75rem;
+  letter-spacing:0.08em;transition:all 0.2s
+}
+.btn-outline:hover{border-color:var(--text2);color:var(--text)}
+
+/* floating data nodes bg */
+.hero-bg-nodes{position:absolute;right:0;top:0;width:45%;height:100%;pointer-events:none;overflow:hidden;opacity:0.35}
+@media(max-width:900px){.hero-bg-nodes{display:none}}
+
+/* ── SECTIONS ── */
+.pf-section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+@media(min-width:769px){.pf-section{padding:6rem 4rem}}
+.sec-label{
+  font-family:'Space Mono',monospace;font-size:0.65rem;
+  color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;
+  margin-bottom:0.5rem
+}
+.sec-title{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:-0.02em;
+  color:var(--text);margin-bottom:0.5rem
+}
+.sec-divider{
+  display:flex;align-items:center;gap:1rem;margin-bottom:3rem
+}
+.sec-divider::before{content:'';width:32px;height:1px;background:var(--accent)}
+.sec-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── ABOUT ── */
+.about-wrap{display:grid;grid-template-columns:1fr;gap:3rem}
+@media(min-width:700px){.about-wrap{grid-template-columns:1.1fr 0.9fr;align-items:start}}
+.about-body p{color:var(--text2);line-height:1.85;margin-bottom:1rem;font-size:0.95rem}
+.about-body p strong{color:var(--text);font-weight:500}
+.specs{display:flex;flex-direction:column;gap:0.5rem}
+.spec-item{
+  display:flex;align-items:baseline;gap:0.75rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;padding:0.65rem 1rem
+}
+.spec-k{
+  font-family:'Space Mono',monospace;font-size:0.6rem;
+  color:var(--text3);letter-spacing:0.1em;min-width:90px;flex-shrink:0
+}
+.spec-v{font-size:0.85rem;color:var(--text)}
+.spec-v.hi{color:var(--accent)}
+
+/* ── SKILLS ── */
+.skills-cats{display:flex;flex-direction:column;gap:2rem}
+.skill-cat-title{
+  font-family:'Space Mono',monospace;font-size:0.65rem;
+  color:var(--text3);letter-spacing:0.15em;text-transform:uppercase;
+  margin-bottom:0.75rem
+}
+.skill-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
+.skill-tag{
+  background:rgba(14,20,25,0.9);border:1px solid var(--border);
+  color:var(--text2);padding:0.45rem 0.9rem;border-radius:3px;
+  font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:0.05em;
+  transition:all 0.2s;cursor:default
+}
+.skill-tag:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,229,180,0.05)}
+.skill-tag.accent{border-color:rgba(0,229,180,0.25);color:var(--accent)}
+
+/* ── PROJECTS ── */
+.projects-grid{display:grid;grid-template-columns:1fr;gap:1.5rem}
+@media(min-width:700px){.projects-grid{grid-template-columns:1fr 1fr}}
+.proj-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;transition:all 0.3s;
+  position:relative
+}
+.proj-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,229,180,0.04),transparent);
+  opacity:0;transition:opacity 0.3s
+}
+.proj-card:hover{border-color:rgba(0,229,180,0.35);transform:translateY(-4px)}
+.proj-card:hover::before{opacity:1}
+.proj-top{
+  height:5px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2))
+}
+.proj-top.pink{background:linear-gradient(90deg,var(--accent3),#ff9a3c)}
+.proj-body{padding:1.5rem}
+.proj-type-badge{
+  display:inline-block;
+  background:rgba(0,229,180,0.08);border:1px solid rgba(0,229,180,0.2);
+  color:var(--accent);padding:0.2rem 0.6rem;border-radius:2px;
+  font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;
+  text-transform:uppercase;margin-bottom:0.75rem
+}
+.proj-type-badge.blue{background:rgba(0,144,255,0.08);border-color:rgba(0,144,255,0.2);color:var(--accent2)}
+.proj-name{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:1.15rem;
+  letter-spacing:-0.01em;margin-bottom:0.5rem;color:var(--text)
+}
+.proj-desc{font-size:0.85rem;color:var(--text2);line-height:1.7;margin-bottom:1.25rem}
+.proj-tags{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:1.25rem}
+.proj-tag{
+  background:rgba(0,144,255,0.06);border:1px solid rgba(0,144,255,0.15);
+  color:#5bb8ff;padding:0.15rem 0.55rem;border-radius:2px;
+  font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.05em
+}
+.proj-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--border);padding-top:0.85rem;
+  font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--text3)
+}
+.proj-links{display:flex;gap:0.5rem}
+.proj-link{
+  color:var(--text2);text-decoration:none;font-size:0.72rem;
+  font-family:'Space Mono',monospace;border:1px solid var(--border);
+  padding:0.3rem 0.7rem;border-radius:3px;transition:all 0.2s;letter-spacing:0.05em
+}
+.proj-link:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Highlighted project card */
+.proj-card.featured{
+  border-color:rgba(0,229,180,0.2);
+  background:linear-gradient(135deg,rgba(0,229,180,0.03),rgba(14,20,25,0.95))
+}
+
+/* ── CONTACT ── */
+.contact-wrap{
+  max-width:600px;margin:0 auto;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:2.5rem;position:relative;overflow:hidden
+}
+.contact-wrap::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent)
+}
+.contact-intro{color:var(--text2);line-height:1.75;margin-bottom:2rem;text-align:center;font-size:0.92rem}
+.contact-grid{display:flex;flex-direction:column;gap:0.6rem}
+.contact-row{
+  display:flex;align-items:center;gap:1rem;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:4px;padding:0.85rem 1rem;
+  text-decoration:none;color:var(--text);transition:border-color 0.2s
+}
+.contact-row:hover{border-color:rgba(0,229,180,0.35)}
+.ci{font-size:0.95rem;width:1.2rem;text-align:center;color:var(--accent);flex-shrink:0}
+.cl{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;display:block}
+.cv{font-size:0.85rem;color:var(--text)}
+
+/* ── FOOTER ── */
+.pf-footer{
+  text-align:center;padding:2rem 2rem;
+  border-top:1px solid var(--border);
+  font-family:'Space Mono',monospace;font-size:0.65rem;
+  color:var(--text3);letter-spacing:0.1em
+}
+
+/* ── LOGIN ── */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:2rem 1.75rem;width:100%;max-width:420px;
+  position:relative;overflow:hidden
+}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.login-logo{text-align:center;margin-bottom:2rem}
+.login-logo .big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--accent);letter-spacing:-0.02em}
+.login-logo p{font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--text3);margin-top:0.4rem;letter-spacing:0.1em}
+.form-group{margin-bottom:1.1rem}
+.form-group label{display:block;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem}
+.form-group input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 0.9rem;border-radius:4px;font-family:'Space Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s}
+.form-group input:focus{border-color:var(--accent)}
+.login-btn{width:100%;background:var(--accent);color:#05070a;border:none;padding:0.8rem;border-radius:4px;font-family:'Space Mono',monospace;font-size:0.82rem;font-weight:700;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s}
+.login-btn:hover{background:#00ffcb}
+.login-err{color:#ff5c87;font-size:0.7rem;text-align:center;margin-top:0.6rem;display:none;font-family:'Space Mono',monospace}
+
+/* ── ADMIN ── */
+.admin-layout{display:flex;min-height:100vh}
+.admin-sidebar{
+  width:230px;background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:1.25rem 0;flex-shrink:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform 0.3s
+}
+@media(max-width:768px){
+  .admin-sidebar{position:fixed;top:0;left:0;height:100vh;z-index:300;transform:translateX(-100%)}
+  .admin-sidebar.open{transform:translateX(0)}
+}
+.sidebar-logo{padding:0 1.25rem 1.25rem;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:var(--accent);letter-spacing:0.05em;border-bottom:1px solid var(--border)}
+.sidebar-logo span{display:block;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--text3);font-weight:400;margin-top:0.25rem;letter-spacing:0.08em}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:299}
+.sidebar-overlay.open{display:block}
+.sidebar-nav{padding:0.75rem 0;list-style:none}
+.sidebar-nav li a,.sidebar-nav li button{display:flex;align-items:center;gap:0.6rem;width:100%;padding:0.55rem 1.25rem;color:var(--text2);text-decoration:none;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:0.05em;background:transparent;border:none;cursor:pointer;transition:all 0.15s}
+.sidebar-nav li a:hover,.sidebar-nav li button:hover,.sidebar-nav li a.active{background:rgba(0,229,180,0.06);color:var(--accent);border-right:2px solid var(--accent)}
+.sidebar-sep{height:1px;background:var(--border);margin:0.5rem 0}
+.logout-btn{color:#ff5c87 !important}
+.admin-main{flex:1;overflow-y:auto;background:var(--bg);min-width:0}
+.admin-header{padding:0 1.5rem;height:54px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:1rem;position:sticky;top:0;z-index:10}
+.admin-header h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.05em}
+.menu-toggle{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:6px;background:transparent;border:none}
+.menu-toggle span{display:block;width:20px;height:1.5px;background:var(--text2);border-radius:2px}
+@media(max-width:768px){.menu-toggle{display:flex}}
+.admin-content{padding:1.5rem}
+@media(min-width:769px){.admin-content{padding:2rem}}
+.a-panel{display:none}
+.a-panel.active{display:block}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:1rem}
+.panel-header h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.05em}
+.add-btn{background:transparent;border:1px solid var(--border2);color:var(--accent);padding:0.4rem 1rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.72rem;cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.add-btn:hover{background:rgba(0,229,180,0.06)}
+.admin-items{display:flex;flex-direction:column;gap:0.6rem}
+.admin-item{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.8rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem}
+.admin-item-info{flex:1;min-width:0}
+.admin-item-name{font-weight:500;font-size:0.88rem;margin-bottom:0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-item-sub{font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--text2)}
+.admin-item-actions{display:flex;gap:0.4rem;flex-shrink:0}
+.edit-btn,.del-btn{padding:0.28rem 0.6rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.68rem;cursor:pointer;border:1px solid;transition:all 0.15s}
+.edit-btn{background:rgba(0,229,180,0.05);border-color:rgba(0,229,180,0.2);color:var(--accent)}
+.edit-btn:hover{background:rgba(0,229,180,0.12)}
+.del-btn{background:rgba(255,92,135,0.05);border-color:rgba(255,92,135,0.2);color:#ff5c87}
+.del-btn:hover{background:rgba(255,92,135,0.12)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:1rem;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--accent)}
+.stat-label{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.2rem}
+.welcome-card{background:linear-gradient(135deg,rgba(0,229,180,0.05),rgba(14,20,25,0.9));border:1px solid var(--border);border-radius:6px;padding:1.5rem;margin-bottom:1.5rem}
+.welcome-card h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.welcome-card p{color:var(--text2);font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:0.05em}
+.pf-url{display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.9rem;background:rgba(0,229,180,0.05);padding:0.4rem 0.85rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--accent);border:1px solid var(--border2);cursor:pointer;transition:background 0.2s}
+.pf-url:hover{background:rgba(0,229,180,0.1)}
+.empty-state{text-align:center;padding:3rem;color:var(--text3);font-family:'Space Mono',monospace;font-size:0.78rem}
+.success-toast{display:none;position:fixed;bottom:1.5rem;right:1.5rem;background:var(--accent);color:#05070a;padding:0.6rem 1.25rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;z-index:9999}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.modal-overlay{align-items:center;padding:2rem}}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px 10px 0 0;padding:1.5rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;position:relative}
+@media(min-width:600px){.modal{border-radius:8px;padding:2rem}}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.modal h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.25rem;letter-spacing:0.05em}
+.modal .form-group{margin-bottom:0.85rem}
+.modal .form-group label{display:block;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.35rem}
+.modal .form-group input,.modal .form-group textarea,.modal .form-group select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.6rem 0.85rem;border-radius:4px;font-family:inherit;font-size:0.88rem;outline:none;transition:border-color 0.2s;resize:vertical}
+.modal .form-group input:focus,.modal .form-group textarea:focus,.modal .form-group select:focus{border-color:var(--accent)}
+.modal .form-group select option{background:var(--bg3)}
+.modal-btns{display:flex;gap:0.6rem;justify-content:flex-end;margin-top:1.25rem}
+.save-btn{background:var(--accent);color:#05070a;border:none;padding:0.55rem 1.4rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.75rem;font-weight:700;cursor:pointer}
+.cancel-btn{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:0.55rem 1.4rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.75rem;cursor:pointer}
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.5rem;margin-bottom:1.25rem}
+.profile-card h4{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--accent);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.15em}
+.profile-card .form-group{margin-bottom:0.75rem}
+.profile-card .form-group label{display:block;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.35rem}
+.profile-card .form-group input,.profile-card .form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.6rem 0.85rem;border-radius:4px;font-family:inherit;font-size:0.88rem;outline:none;transition:border-color 0.2s;resize:vertical}
+.profile-card .form-group input:focus,.profile-card .form-group textarea:focus{border-color:var(--accent)}
+.profile-card .form-group textarea{min-height:90px}
+.save-profile-btn{background:transparent;border:1px solid var(--border2);color:var(--accent);padding:0.55rem 1.4rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;margin-top:0.5rem}
+.save-profile-btn:hover{background:rgba(0,229,180,0.08)}
+</style>
+</head>
+<body>
+<div class="scan-line"></div>
+<div id="app">
+
+<!-- ===== PORTFOLIO ===== -->
+<div class="page active" id="page-portfolio">
+  <nav class="pf-nav">
+    <div class="pf-logo">
+      <span id="nav-name">MAZEN</span><span class="pipe">/</span><span class="acc">DATA</span>
+    </div>
+    <ul class="pf-links">
+      <li><a href="#about" onclick="closeMobileNav()">about</a></li>
+      <li><a href="#skills" onclick="closeMobileNav()">skills</a></li>
+      <li><a href="#projects" onclick="closeMobileNav()">projects</a></li>
+      <li><a href="#contact" onclick="closeMobileNav()">contact</a></li>
+      <li><button class="admin-btn" onclick="showPage('login')">⚙ admin</button></li>
+    </ul>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#about" onclick="closeMobileNav()">// about</a>
+    <a href="#skills" onclick="closeMobileNav()">// skills</a>
+    <a href="#projects" onclick="closeMobileNav()">// projects</a>
+    <a href="#contact" onclick="closeMobileNav()">// contact</a>
+    <a href="#" onclick="closeMobileNav();showPage('login')">⚙ admin panel</a>
+  </div>
+
+  <section class="pf-hero">
+    <!-- bg decorative SVG -->
+    <svg class="hero-bg-nodes" viewBox="0 0 500 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="150" cy="200" r="120" stroke="#00e5b4" stroke-width="0.5" stroke-dasharray="3 9"/>
+      <circle cx="350" cy="500" r="160" stroke="#0090ff" stroke-width="0.5" stroke-dasharray="2 8"/>
+      <circle cx="250" cy="350" r="30" stroke="#00e5b4" stroke-width="1" fill="rgba(0,229,180,0.04)"/>
+      <circle cx="250" cy="350" r="8" fill="#00e5b4" opacity="0.3"/>
+      <circle cx="80" cy="120" r="5" fill="#0090ff" opacity="0.5"/>
+      <circle cx="420" cy="280" r="4" fill="#00e5b4" opacity="0.4"/>
+      <circle cx="60" cy="450" r="3" fill="#ff5c87" opacity="0.5"/>
+      <circle cx="440" cy="600" r="6" fill="#0090ff" opacity="0.3"/>
+      <line x1="80" y1="120" x2="250" y2="350" stroke="#00e5b4" stroke-width="0.4" stroke-dasharray="4 6"/>
+      <line x1="420" y1="280" x2="250" y2="350" stroke="#0090ff" stroke-width="0.4" stroke-dasharray="4 6"/>
+      <line x1="440" y1="600" x2="250" y2="350" stroke="#00e5b4" stroke-width="0.4" stroke-dasharray="4 6"/>
+      <line x1="60" y1="450" x2="250" y2="350" stroke="#ff5c87" stroke-width="0.4" stroke-dasharray="4 6"/>
+      <!-- database icons -->
+      <rect x="30" y="90" width="60" height="14" rx="3" stroke="#00e5b4" stroke-width="0.6" fill="rgba(0,229,180,0.04)"/>
+      <rect x="30" y="106" width="60" height="14" rx="3" stroke="#00e5b4" stroke-width="0.6" fill="rgba(0,229,180,0.04)"/>
+      <rect x="390" y="255" width="60" height="14" rx="3" stroke="#0090ff" stroke-width="0.6" fill="rgba(0,144,255,0.04)"/>
+      <rect x="390" y="271" width="60" height="14" rx="3" stroke="#0090ff" stroke-width="0.6" fill="rgba(0,144,255,0.04)"/>
+      <!-- small data flow arrows -->
+      <polyline points="200,150 220,140 240,150" stroke="#00e5b4" stroke-width="0.5" fill="none"/>
+      <polyline points="300,400 320,390 340,400" stroke="#0090ff" stroke-width="0.5" fill="none"/>
+    </svg>
+
+    <div class="hero-inner">
+      <div class="hero-badge"><span class="badge-dot"></span>AVAILABLE FOR HIRE — DATA ENGINEERING</div>
+      <h1 class="hero-name">
+        <span class="line1" id="hero-firstname">MAZEN</span>
+        <span class="line2" id="hero-lastname">ABDELHAMID</span>
+      </h1>
+      <p class="hero-role" id="hero-title">Senior Data Engineer</p>
+      <p class="hero-desc" id="hero-bio">Building the pipelines that power decisions. I design scalable data infrastructure — from real-time ingestion to analytical warehouses — turning raw data into reliable, queryable assets.</p>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num">4+</div><div class="stat-lbl">YRS EXP</div></div>
+        <div class="stat-item"><div class="stat-num">12+</div><div class="stat-lbl">PIPELINES</div></div>
+        <div class="stat-item"><div class="stat-num">TB</div><div class="stat-lbl">DATA PROCESSED</div></div>
+      </div>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})">VIEW PROJECTS</button>
+        <button class="btn-outline" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">CONTACT ME</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="pf-section" id="about">
+    <div class="sec-label">// 01. about</div>
+    <h2 class="sec-title">About Me</h2>
+    <div class="sec-divider"></div>
+    <div class="about-wrap">
+      <div class="about-body" id="about-text">
+        <p>I'm <strong>Mazen Abdelhamid</strong>, a Data Engineer based in Cairo with a passion for building resilient, scalable data systems that teams actually rely on.</p>
+        <p>My expertise spans the full data stack — from <strong>ingestion and streaming</strong> with Kafka and Spark, to <strong>orchestration</strong> with Airflow and dbt, and analytical modeling in <strong>BigQuery</strong> and <strong>Snowflake</strong>.</p>
+        <p>I believe great data engineering is invisible — when pipelines just work, analysts can focus on insights, not debugging broken schedules at 3am.</p>
+      </div>
+      <div class="specs" id="about-specs">
+        <div class="spec-item"><span class="spec-k">ROLE</span><span class="spec-v">Data Engineer</span></div>
+        <div class="spec-item"><span class="spec-k">LOCATION</span><span class="spec-v">Cairo, Egypt</span></div>
+        <div class="spec-item"><span class="spec-k">STACK</span><span class="spec-v hi">Python · Spark · Kafka</span></div>
+        <div class="spec-item"><span class="spec-k">STATUS</span><span class="spec-v hi" id="hero-tag">// Open to opportunities</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="pf-section" id="skills">
+    <div class="sec-label">// 02. skills</div>
+    <h2 class="sec-title">Technical Stack</h2>
+    <div class="sec-divider"></div>
+    <div id="skills-list"></div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="pf-section" id="projects">
+    <div class="sec-label">// 03. projects</div>
+    <h2 class="sec-title">Engineering Projects</h2>
+    <div class="sec-divider"></div>
+    <div class="projects-grid" id="projects-list"></div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="pf-section" id="contact">
+    <div class="sec-label">// 04. contact</div>
+    <h2 class="sec-title">Get in Touch</h2>
+    <div class="sec-divider"></div>
+    <div class="contact-wrap">
+      <p class="contact-intro" id="contact-bio">Open to full-time roles, freelance data projects, and consulting. Let's talk data.</p>
+      <div class="contact-grid" id="contact-info"></div>
+    </div>
+  </section>
+
+  <footer class="pf-footer">
+    <span id="footer-name">MAZEN ABDELHAMID</span> — DATA ENGINEER — CAIRO, EG — <span id="footer-year"></span>
+  </footer>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div class="page" id="page-login">
+  <div class="login-page">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="big">⚙ ADMIN</div>
+        <p>// portfolio control panel</p>
+      </div>
+      <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="admin" autocomplete="username"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="login-btn" onclick="doLogin()">AUTHENTICATE</button>
+      <p class="login-err" id="login-err">// ERR: wrong credentials</p>
+      <p style="text-align:center;margin-top:1rem;font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--text3)">default: admin / admin123</p>
+      <button onclick="showPage('portfolio')" style="display:block;margin:0.9rem auto 0;background:transparent;border:none;color:var(--text2);cursor:pointer;font-family:'Space Mono',monospace;font-size:0.72rem">← back to portfolio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="page" id="page-admin">
+  <div class="admin-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-logo">CMS PANEL<span>// portfolio admin</span></div>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="return showPanel('dashboard')" id="nav-dashboard" class="active">📊 Dashboard</a></li>
+        <li><a href="#" onclick="return showPanel('profile')" id="nav-profile">👤 Profile</a></li>
+        <li><a href="#" onclick="return showPanel('skills')" id="nav-skills">⚡ Skills</a></li>
+        <li><a href="#" onclick="return showPanel('projects')" id="nav-projects">🗄 Projects</a></li>
+        <li><a href="#" onclick="return showPanel('contact')" id="nav-contact">📬 Contact</a></li>
+        <div class="sidebar-sep"></div>
+        <li><a href="#" onclick="showPage('portfolio')">🌐 View Portfolio</a></li>
+        <li><button onclick="doLogout()" class="logout-btn">🚪 Logout</button></li>
+      </ul>
+    </aside>
+    <main class="admin-main">
+      <div class="admin-header">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <button class="menu-toggle" onclick="openSidebar()"><span></span><span></span><span></span></button>
+          <h2 id="panel-title">DASHBOARD</h2>
+        </div>
+        <span style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--text2)" id="admin-greeting"></span>
+      </div>
+      <div class="admin-content">
+
+        <div class="a-panel active" id="panel-dashboard">
+          <div class="welcome-card">
+            <h3>ONLINE — <span id="admin-name">ADMIN</span></h3>
+            <p>// portfolio system operational. all pipelines green.</p>
+            <div class="pf-url" onclick="copyPortfolioURL()">🔗 <span id="pf-url-text">COPY URL</span></div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-num" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
+            <div class="stat-card"><div class="stat-num" id="stat-projects">0</div><div class="stat-label">Projects</div></div>
+            <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Certs</div></div>
+          </div>
+        </div>
+
+        <div class="a-panel" id="panel-profile">
+          <div class="panel-header"><h3>EDIT PROFILE</h3></div>
+          <div class="profile-card">
+            <h4>Personal Info</h4>
+            <div class="form-group"><label>Full Name</label><input id="p-name" placeholder="Mazen Abdelhamid"></div>
+            <div class="form-group"><label>Job Title</label><input id="p-title" placeholder="Senior Data Engineer"></div>
+            <div class="form-group"><label>Hero Bio</label><textarea id="p-bio"></textarea></div>
+            <div class="form-group"><label>Status Tag</label><input id="p-tag" placeholder="// Open to opportunities"></div>
+            <div class="form-group"><label>About (detailed)</label><textarea id="p-about" style="min-height:110px"></textarea></div>
+            <button class="save-profile-btn" onclick="saveProfile()">SAVE PROFILE</button>
+          </div>
+        </div>
+
+        <div class="a-panel" id="panel-skills">
+          <div class="panel-header"><h3>SKILLS</h3><button class="add-btn" onclick="openModal('skill')">+ ADD</button></div>
+          <div class="admin-items" id="admin-skills-list"></div>
+        </div>
+
+        <div class="a-panel" id="panel-projects">
+          <div class="panel-header"><h3>PROJECTS</h3><button class="add-btn" onclick="openModal('project')">+ ADD</button></div>
+          <div class="admin-items" id="admin-projects-list"></div>
+        </div>
+
+        <div class="a-panel" id="panel-contact">
+          <div class="panel-header"><h3>CONTACT INFO</h3></div>
+          <div class="profile-card">
+            <h4>Contact Details</h4>
+            <div class="form-group"><label>Email</label><input id="c-email"></div>
+            <div class="form-group"><label>Phone</label><input id="c-phone"></div>
+            <div class="form-group"><label>LinkedIn URL</label><input id="c-linkedin"></div>
+            <div class="form-group"><label>GitHub URL</label><input id="c-github"></div>
+            <div class="form-group"><label>Contact Bio</label><input id="c-bio"></div>
+            <button class="save-profile-btn" onclick="saveContact()">SAVE CONTACT</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">ADD ITEM</h3>
+    <div id="modal-body"></div>
+    <div class="modal-btns">
+      <button class="cancel-btn" onclick="closeModal()">CANCEL</button>
+      <button class="save-btn" onclick="saveModal()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<div class="success-toast" id="toast">✓ SAVED</div>
+
+</div>
+
+<script>
+const ADMIN_USER='admin',ADMIN_PASS='admin123';
+
+let data={
+  profile:{
+    name:'Mazen Abdelhamid',
+    title:'Senior Data Engineer',
+    bio:'Building the pipelines that power decisions. I design scalable data infrastructure — from real-time ingestion to analytical warehouses — turning raw data into reliable, queryable assets.',
+    tag:'// Open to opportunities',
+    about:'I\'m Mazen Abdelhamid, a Data Engineer based in Cairo with a passion for building resilient, scalable data systems that teams actually rely on.\n\nMy expertise spans the full data stack — from ingestion and streaming with Kafka and Spark, to orchestration with Airflow and dbt, and analytical modeling in BigQuery and Snowflake.\n\nI believe great data engineering is invisible — when pipelines just work, analysts can focus on insights, not debugging broken schedules at 3am.'
+  },
+  skills:{
+    'Languages & Query':['Python','SQL','Bash','Scala'],
+    'Data Processing':['Apache Spark','Apache Kafka','dbt','Pandas','Polars'],
+    'Orchestration':['Apache Airflow','Prefect','dbt Cloud'],
+    'Cloud & Warehouses':['BigQuery','Snowflake','AWS S3','GCP','Redshift'],
+    'Infrastructure':['Docker','Kubernetes','Terraform','Git','Linux']
+  },
+  projects:[
+    {
+      id:1,
+      name:'Real-Time E-Commerce Analytics Pipeline',
+      type:'Streaming · Data Engineering',
+      typeStyle:'teal',
+      desc:'End-to-end streaming pipeline ingesting 2M+ daily events from an e-commerce platform. Built with Kafka for event streaming, Spark Structured Streaming for real-time aggregations, and Redshift for analytical queries. Reduced reporting latency from 24 hours to under 5 minutes.',
+      tags:['Apache Kafka','Spark Streaming','Redshift','Python','Airflow','Docker'],
+      demo:'',github:'',
+      featured:true
+    },
+    {
+      id:2,
+      name:'Multi-Source ETL Warehouse Platform',
+      type:'Batch · Data Warehouse',
+      typeStyle:'blue',
+      desc:'Designed and built a modular ETL framework aggregating data from 8 disparate sources (REST APIs, PostgreSQL, S3, Salesforce) into a centralized BigQuery data warehouse. Implemented dbt for transformation layer with full lineage tracking and automated data quality checks.',
+      tags:['BigQuery','dbt','Airflow','Terraform','GCP','Python','SQL'],
+      demo:'',github:'',
+      featured:false
+    }
+  ],
+  contact:{
+    email:'mazen.abdelhamid@email.com',
+    phone:'+20 100 123 4567',
+    linkedin:'https://linkedin.com/in/mazen-abdelhamid',
+    github:'https://github.com/mazen-abdelhamid',
+    bio:'Open to full-time roles, freelance data projects, and consulting. Let\'s talk data.'
+  }
+};
+
+let modalMode=null,editId=null;
+
+document.getElementById('footer-year').textContent=new Date().getFullYear();
+
+async function loadData(){
+  try{const r=await window.storage.get('de-portfolio-v1');if(r&&r.value)data=JSON.parse(r.value);}catch(e){}
+  renderPortfolio();renderAdmin();
+}
+async function saveData(){
+  try{await window.storage.set('de-portfolio-v1',JSON.stringify(data));}catch(e){}
+  renderPortfolio();renderAdmin();showToast();
+}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  window.scrollTo(0,0);closeMobileNav();
+  if(p==='admin'){
+    document.getElementById('admin-name').textContent=ADMIN_USER.toUpperCase();
+    document.getElementById('admin-greeting').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric'});
+    renderAdmin();
+  }
+  if(p==='portfolio')renderPortfolio();
+}
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  if(u===ADMIN_USER&&p===ADMIN_PASS){document.getElementById('login-err').style.display='none';showPage('admin');}
+  else document.getElementById('login-err').style.display='block';
+}
+function doLogout(){showPage('portfolio');}
+
+function toggleMobileNav(){
+  const nav=document.getElementById('mobile-nav');
+  const btn=document.getElementById('hamburger');
+  btn.classList.toggle('open');
+  nav.classList.toggle('open');
+}
+function closeMobileNav(){
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+function openSidebar(){
+  document.getElementById('admin-sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar(){
+  document.getElementById('admin-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+function showPanel(name){
+  document.querySelectorAll('.a-panel').forEach(x=>x.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.sidebar-nav a').forEach(x=>x.classList.remove('active'));
+  const el=document.getElementById('nav-'+name);if(el)el.classList.add('active');
+  const titles={dashboard:'DASHBOARD',profile:'EDIT PROFILE',skills:'SKILLS',projects:'PROJECTS',contact:'CONTACT INFO'};
+  document.getElementById('panel-title').textContent=titles[name]||name.toUpperCase();
+  if(name==='profile')fillProfileForm();
+  if(name==='contact')fillContactForm();
+  closeSidebar();return false;
+}
+
+function renderPortfolio(){
+  const {profile,skills,projects,contact}=data;
+  const parts=profile.name.split(' ');
+  document.getElementById('nav-name').textContent=(parts[0]||'MAZEN').toUpperCase();
+  document.getElementById('hero-firstname').textContent=(parts[0]||'MAZEN').toUpperCase();
+  document.getElementById('hero-lastname').textContent=(parts.slice(1).join(' ')||'ABDELHAMID').toUpperCase();
+  document.getElementById('hero-title').textContent=profile.title;
+  document.getElementById('hero-bio').textContent=profile.bio;
+  document.getElementById('hero-tag').textContent=profile.tag;
+  document.getElementById('footer-name').textContent=profile.name.toUpperCase();
+  if(profile.about){
+    document.getElementById('about-text').innerHTML=profile.about.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+  }
+
+  // Skills — grouped or flat
+  const sl=document.getElementById('skills-list');
+  if(typeof skills==='object'&&!Array.isArray(skills)){
+    sl.innerHTML=`<div style="display:flex;flex-direction:column;gap:1.75rem">`+Object.entries(skills).map(([cat,tags])=>`
+      <div>
+        <div class="skill-cat-title">${cat}</div>
+        <div class="skill-tags">${tags.map(t=>`<div class="skill-tag">${t}</div>`).join('')}</div>
+      </div>`).join('')+'</div>';
+  } else {
+    sl.innerHTML=`<div class="skill-tags">`+(skills||[]).map(s=>`<div class="skill-tag">${s}</div>`).join('')+'</div>';
+  }
+
+  // Projects
+  document.getElementById('projects-list').innerHTML=projects.length?projects.map(p=>`
+    <div class="proj-card${p.featured?' featured':''}">
+      <div class="proj-top${p.typeStyle==='blue'?' pink':''}"></div>
+      <div class="proj-body">
+        <div class="proj-type-badge${p.typeStyle==='blue'?' blue':''}">${p.type||'Data Engineering'}</div>
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-desc">${p.desc}</div>
+        <div class="proj-tags">${(p.tags||[]).map(t=>`<span class="proj-tag">${t}</span>`).join('')}</div>
+        <div class="proj-meta">
+          <div class="proj-links">
+            ${p.demo?`<a href="${p.demo}" class="proj-link" target="_blank">↗ DEMO</a>`:''}
+            ${p.github?`<a href="${p.github}" class="proj-link" target="_blank">⌥ GITHUB</a>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`).join(''):'<p style="color:var(--text3)">No projects yet.</p>';
+
+  // Contact
+  document.getElementById('contact-bio').textContent=contact.bio;
+  const items=[];
+  if(contact.email)items.push(`<a class="contact-row" href="mailto:${contact.email}"><span class="ci">✉</span><div><span class="cl">email</span><span class="cv">${contact.email}</span></div></a>`);
+  if(contact.phone)items.push(`<a class="contact-row" href="tel:${contact.phone}"><span class="ci">📱</span><div><span class="cl">phone</span><span class="cv">${contact.phone}</span></div></a>`);
+  if(contact.linkedin)items.push(`<a class="contact-row" href="${contact.linkedin}" target="_blank"><span class="ci">💼</span><div><span class="cl">linkedin</span><span class="cv">LinkedIn Profile</span></div></a>`);
+  if(contact.github)items.push(`<a class="contact-row" href="${contact.github}" target="_blank"><span class="ci">⌥</span><div><span class="cl">github</span><span class="cv">GitHub Profile</span></div></a>`);
+  document.getElementById('contact-info').innerHTML=items.join('');
+}
+
+function renderAdmin(){
+  const skillCount=Array.isArray(data.skills)?data.skills.length:Object.values(data.skills||{}).reduce((a,b)=>a+b.length,0);
+  document.getElementById('stat-skills').textContent=skillCount;
+  document.getElementById('stat-projects').textContent=(data.projects||[]).length;
+  // Skills admin (flat for admin simplicity)
+  const allSkills=Array.isArray(data.skills)?data.skills:Object.entries(data.skills||{}).flatMap(([cat,tags])=>tags.map(t=>cat+' → '+t));
+  document.getElementById('admin-skills-list').innerHTML=allSkills.length?allSkills.map((s,i)=>`<div class="admin-item"><div class="admin-item-info"><div class="admin-item-name">${s}</div></div><div class="admin-item-actions"><button class="del-btn" onclick="deleteSkillFlat(${i})">DEL</button></div></div>`).join(''):'<div class="empty-state">No skills.</div>';
+  document.getElementById('admin-projects-list').innerHTML=(data.projects||[]).length?(data.projects||[]).map((p,i)=>`<div class="admin-item"><div class="admin-item-info"><div class="admin-item-name">${p.name}</div><div class="admin-item-sub">${p.type||''}</div></div><div class="admin-item-actions"><button class="edit-btn" onclick="openModal('project',${i})">EDIT</button><button class="del-btn" onclick="deleteItem('project',${i})">DEL</button></div></div>`).join(''):'<div class="empty-state">No projects.</div>';
+}
+
+function fillProfileForm(){
+  const p=data.profile;
+  document.getElementById('p-name').value=p.name||'';
+  document.getElementById('p-title').value=p.title||'';
+  document.getElementById('p-bio').value=p.bio||'';
+  document.getElementById('p-tag').value=p.tag||'';
+  document.getElementById('p-about').value=p.about||'';
+}
+function fillContactForm(){
+  const c=data.contact;
+  ['email','phone','linkedin','github','bio'].forEach(k=>{const el=document.getElementById('c-'+k);if(el)el.value=c[k]||'';});
+}
+function saveProfile(){
+  data.profile={
+    name:document.getElementById('p-name').value||data.profile.name,
+    title:document.getElementById('p-title').value||data.profile.title,
+    bio:document.getElementById('p-bio').value||data.profile.bio,
+    tag:document.getElementById('p-tag').value||data.profile.tag,
+    about:document.getElementById('p-about').value||data.profile.about
+  };
+  saveData();
+}
+function saveContact(){
+  data.contact={
+    email:document.getElementById('c-email').value,
+    phone:document.getElementById('c-phone').value,
+    linkedin:document.getElementById('c-linkedin').value,
+    github:document.getElementById('c-github').value,
+    bio:document.getElementById('c-bio').value
+  };
+  saveData();
+}
+
+function deleteSkillFlat(idx){
+  if(!confirm('Delete?'))return;
+  const all=Array.isArray(data.skills)?data.skills:Object.entries(data.skills).flatMap(([c,t])=>t);
+  all.splice(idx,1);
+  data.skills=all;
+  saveData();
+}
+
+function openModal(type,idx){
+  modalMode=type;editId=(idx!==undefined)?idx:null;
+  const body=document.getElementById('modal-body');
+  const title=document.getElementById('modal-title');
+  if(type==='skill'){
+    title.textContent='ADD SKILL';
+    body.innerHTML=`<div class="form-group"><label>Category</label><input id="m-scat" placeholder="Languages & Query"></div><div class="form-group"><label>Skill Name</label><input id="m-skill" placeholder="Python"></div>`;
+  } else if(type==='project'){
+    const p=(editId!==null)?data.projects[editId]:{};
+    title.textContent=editId!==null?'EDIT PROJECT':'ADD PROJECT';
+    body.innerHTML=`
+      <div class="form-group"><label>Project Name</label><input id="m-pname" value="${p.name||''}"></div>
+      <div class="form-group"><label>Type / Badge Label</label><input id="m-ptype" value="${p.type||'Data Engineering'}"></div>
+      <div class="form-group"><label>Description</label><textarea id="m-pdesc" rows="4">${p.desc||''}</textarea></div>
+      <div class="form-group"><label>Tags (comma separated)</label><input id="m-ptags" value="${(p.tags||[]).join(', ')}"></div>
+      <div class="form-group"><label>Demo URL</label><input id="m-pdemo" value="${p.demo||''}"></div>
+      <div class="form-group"><label>GitHub URL</label><input id="m-pgithub" value="${p.github||''}"></div>
+      <div class="form-group"><label>Featured?</label><select id="m-pfeat"><option value="false" ${!p.featured?'selected':''}>No</option><option value="true" ${p.featured?'selected':''}>Yes</option></select></div>`;
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>{const f=body.querySelector('input,textarea');if(f)f.focus();},150);
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function saveModal(){
+  if(modalMode==='skill'){
+    const cat=(document.getElementById('m-scat').value||'Other').trim();
+    const v=(document.getElementById('m-skill').value||'').trim();
+    if(!v)return;
+    if(typeof data.skills==='object'&&!Array.isArray(data.skills)){
+      if(!data.skills[cat])data.skills[cat]=[];
+      data.skills[cat].push(v);
+    } else {
+      if(!Array.isArray(data.skills))data.skills=[];
+      data.skills.push(v);
+    }
+  } else if(modalMode==='project'){
+    const p={
+      id:Date.now(),
+      name:document.getElementById('m-pname').value.trim(),
+      type:document.getElementById('m-ptype').value.trim()||'Data Engineering',
+      typeStyle:'teal',
+      desc:document.getElementById('m-pdesc').value.trim(),
+      tags:document.getElementById('m-ptags').value.split(',').map(t=>t.trim()).filter(Boolean),
+      demo:document.getElementById('m-pdemo').value.trim(),
+      github:document.getElementById('m-pgithub').value.trim(),
+      featured:document.getElementById('m-pfeat').value==='true'
+    };
+    if(!p.name)return;
+    if(editId!==null)data.projects[editId]=p;else data.projects.push(p);
+  }
+  closeModal();saveData();
+}
+function deleteItem(type,idx){
+  if(!confirm('Delete this item?'))return;
+  if(type==='project')data.projects.splice(idx,1);
+  saveData();
+}
+function showToast(){const t=document.getElementById('toast');t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
+function copyPortfolioURL(){
+  navigator.clipboard.writeText(window.location.href).then(()=>{
+    document.getElementById('pf-url-text').textContent='✓ COPIED!';
+    setTimeout(()=>document.getElementById('pf-url-text').textContent='COPY URL',2000);
+  });
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+loadData();
+</script>
+</body>
+</html>
